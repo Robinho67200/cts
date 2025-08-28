@@ -25,8 +25,6 @@ df = pd.json_normalize(data, record_path=[
         "AnnotatedLineRef"],
                        meta = [["LinesDelivery", "ResponseTimestamp"]])
 
-df.to_csv("/media/robin/Stockage/5_Projet_Data/cts/script_API/lines-discovery/lines.csv")
-
 df = (
     df
     .rename(columns = {"Extension.RouteType": "RouteType", "Extension.RouteColor": "RouteColor", "Extension.RouteTextColor" : "RouteTextColor", "Extension.LineHidden": "LineHidden", "LinesDelivery.ResponseTimestamp": "ResponseTimestamp"})
