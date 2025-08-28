@@ -22,7 +22,7 @@ WITH ranking_ingest_date AS
 (
 SELECT *,
 DENSE_RANK() OVER(ORDER BY "ResponseTimestamp" DESC) AS rank
-FROM raw_data
+FROM raw_data_estimated_timetable
 )
 SELECT *
 FROM ranking_ingest_date
@@ -50,11 +50,11 @@ for colonne in df_traitement.columns :
 # Etape 4 : Chargement des données dans la base de données Silver
 metadata = MetaData()
 
-raw_data = Table(
-    "clean_data",
+clean_data = Table(
+    "clean_data_estimated_timetable",
     metadata,
 Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("StopPointRef", String, nullable=False),
+    Column("StopCode", String, nullable=False),
     Column("StopPointName", String, nullable=False),
     Column("DestinationName", String, nullable=False),
     Column("DestinationShortName", String, nullable=False),
@@ -66,12 +66,12 @@ Column("id", Integer, primary_key=True, autoincrement=True),
     Column("LineRef", String, nullable=False),
     Column("DirectionRef", String, nullable=False),
     Column("ResponseTimestamp", DateTime, nullable=False),
-    UniqueConstraint("StopPointRef","StopPointName","DestinationName","DestinationShortName","ExpectedDepartureTime","ExpectedArrivalTime","IsRealTime","IsCheckOut","LineRef","DirectionRef", name="uix_clean_data"))
+    UniqueConstraint("StopCode","StopPointName","DestinationName","DestinationShortName","ExpectedDepartureTime","ExpectedArrivalTime","IsRealTime","IsCheckOut","LineRef","DirectionRef", name="uix_clean_data"))
 
 engine = create_engine(f"postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME_2}")
 metadata.create_all(engine)
 
-stmt = insert(raw_data).values(df_traitement.to_dict(orient="records"))
+stmt = insert(clean_data).values(df_traitement.to_dict(orient="records"))
 stmt = stmt.on_conflict_do_nothing(constraint="uix_clean_data")
 
 with engine.begin() as conn:
