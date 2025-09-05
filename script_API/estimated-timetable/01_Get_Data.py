@@ -32,17 +32,17 @@ df = pd.json_normalize(data, record_path=[
 
 df = (
     df
-    .rename(columns = {"Extension.IsRealTime": "IsRealTime", "Extension.IsCheckOut": "IsCheckOut", "ServiceDelivery.EstimatedTimetableDelivery.EstimatedJourneyVersionFrame.EstimatedVehicleJourney.LineRef" : "LineRef", "ServiceDelivery.EstimatedTimetableDelivery.ResponseTimestamp": "ResponseTimestamp", "ServiceDelivery.EstimatedTimetableDelivery.EstimatedJourneyVersionFrame.EstimatedVehicleJourney.DirectionRef": "DirectionRef"})
+    .rename(columns = {"StopPointRef": "StopCode", "Extension.IsRealTime": "IsRealTime", "Extension.IsCheckOut": "IsCheckOut", "ServiceDelivery.EstimatedTimetableDelivery.EstimatedJourneyVersionFrame.EstimatedVehicleJourney.LineRef" : "LineRef", "ServiceDelivery.EstimatedTimetableDelivery.ResponseTimestamp": "ResponseTimestamp", "ServiceDelivery.EstimatedTimetableDelivery.EstimatedJourneyVersionFrame.EstimatedVehicleJourney.DirectionRef": "DirectionRef"})
 )
 
 # Etape 3 : Chargement des données dans la base de données Bronze
 metadata = MetaData()
 
 raw_data = Table(
-    "raw_data",
+    "raw_data_estimated_timetable",
     metadata,
 Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("StopPointRef", String),
+    Column("StopCode", String),
     Column("StopPointName", String),
     Column("DestinationName", String),
     Column("DestinationShortName", String),
@@ -54,7 +54,7 @@ Column("id", Integer, primary_key=True, autoincrement=True),
     Column("LineRef", String),
     Column("DirectionRef", String),
     Column("ResponseTimestamp", DateTime),
-    UniqueConstraint("StopPointRef","StopPointName","DestinationName","DestinationShortName","ExpectedDepartureTime","ExpectedArrivalTime","IsRealTime","IsCheckOut","LineRef","DirectionRef", name="uix_raw_data"))
+    UniqueConstraint("StopCode","StopPointName","DestinationName","DestinationShortName","ExpectedDepartureTime","ExpectedArrivalTime","IsRealTime","IsCheckOut","LineRef","DirectionRef", name="uix_raw_data"))
 
 engine = create_engine(f"postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME}")
 metadata.create_all(engine)
